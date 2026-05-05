@@ -252,7 +252,6 @@ lastClick = now;
 let name = document.getElementById("name").value.trim();
 let email = document.getElementById("email").value.trim().toLowerCase();
 
-/* ✅ ONLY CHANGE: email validation */
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 if (!name || !email) {
@@ -281,13 +280,14 @@ email: email,
 timestamp: Date.now()
 });
 
-/* Increment counter safely */
-counterRef.get().then(counterDoc => {
-let current = counterDoc.exists ? counterDoc.data().count : 0;
-let updated = current + 1;
-
-counterRef.set({ count: updated });
-document.getElementById("counter").innerText = updated;
+/* ✅ FIXED COUNTER INCREMENT */
+counterRef.set(
+  { count: firebase.firestore.FieldValue.increment(1) },
+  { merge: true }
+).then(() => {
+  console.log("Counter incremented");
+}).catch((error) => {
+  console.error("Counter failed:", error);
 });
 
 alert("Thank you for signing!");
