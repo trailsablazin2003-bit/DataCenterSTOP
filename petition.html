@@ -131,27 +131,6 @@ margin-top: 30px;
 text-align: center;
 line-height: 1.4;
 }
-
-@media (max-width: 768px) {
-.navbar { text-align: left; }
-.menu-toggle { display: block; }
-.nav-links {
-display: none;
-flex-direction: column;
-background: #003366;
-position: absolute;
-width: 100%;
-left: 0;
-top: 100%;
-z-index: 1;
-}
-.nav-links.show { display: flex; }
-.nav-links a {
-margin: 0;
-padding: 10px;
-border-bottom: 1px solid #004687;
-}
-}
 </style>
 </head>
 
@@ -208,13 +187,13 @@ Join your neighbors in protecting Marshfield.
 </div>
 
 <p class="disclaimer">
-Disclaimer: The 10% discount on sign orders is offered in appreciation of sharing this petition on social media. This discount is not connected to, and is not provided for, signing the petition. No discounts, incentives, or benefits are given in exchange for signing the petition.
+Disclaimer: The 10% discount on sign orders is offered in appreciation of sharing this petition on social media. This discount is not connected to signing the petition.
 </p>
 
 </div>
 
 <script>
-/* ================= FIREBASE ================= */
+/* FIREBASE */
 const firebaseConfig = {
 apiKey: "AIzaSyDF8eCy7aveviDqjGikC6g0dFJUCkL_uQM",
 authDomain: "datacenterstop-ce374.firebaseapp.com",
@@ -227,24 +206,19 @@ appId: "1:591974235409:web:850a2c1475d26c010320b0"
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-/* ================= COUNTER ================= */
-// Start display at 249
+/* COUNTER */
 let counter = 249;
 const counterEl = document.getElementById("counter");
 
-// Optionally, you can keep Firebase snapshot for future use
-db.collection("signers").onSnapshot(snapshot => {
-  // Only increment counter visually, do not overwrite
-});
-
-/* ================= ANTI-SPAM ================= */
+/* ANTI-SPAM */
 let lastClick = 0;
 
-/* ================= SIGN FUNCTION ================= */
+/* SIGN FUNCTION */
 function signPetition(event) {
+
 const now = Date.now();
 if (now - lastClick < 3000) {
-alert("Please wait a moment before signing again.");
+alert("Please wait before signing again.");
 return;
 }
 lastClick = now;
@@ -252,15 +226,8 @@ lastClick = now;
 let name = document.getElementById("name").value.trim();
 let email = document.getElementById("email").value.trim().toLowerCase();
 
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 if (!name || !email) {
-alert("Please fill out both fields.");
-return;
-}
-
-if (!emailRegex.test(email)) {
-alert("Please enter a valid email address.");
+alert("Please fill out all fields.");
 return;
 }
 
@@ -269,73 +236,49 @@ const signerRef = db.collection("signers").doc(email);
 signerRef.get().then(doc => {
 
 if (doc.exists) {
-alert("This email has already signed the petition.");
+alert("This email already signed.");
 return;
 }
 
-/* Save signer */
+/* SAVE */
 signerRef.set({
-name: name,
-email: email,
+name,
+email,
 timestamp: Date.now()
 }).then(() => {
-  alert("Thank you for signing!");
 
-  // ✅ Increment counter immediately
-  counter += 1;
-  counterEl.innerText = counter;
+alert("Thank you for signing!");
 
-  document.getElementById("name").value = "";
-  document.getElementById("email").value = "";
+// ✅ INCREMENT COUNTER
+counter++;
+counterEl.innerText = counter;
+
+// clear fields
+document.getElementById("name").value = "";
+document.getElementById("email").value = "";
+
 });
+
 });
+
 }
 
-/* ================= SHARE BUTTON ================= */
+/* SHARE */
 function shareFacebook(event) {
 const button = event.target;
 
 const text =
-"Support the Marshfield, MO petition against the proposed data center. Sign here: " +
-window.location.href;
+"Support the Marshfield petition: " + window.location.href;
 
 navigator.clipboard.writeText(text);
 
-button.innerText = "Post copied! Paste it on Facebook when sharing.";
-
-const rect = button.getBoundingClientRect();
+button.innerText = "Copied! Paste on Facebook.";
 
 confetti({
 particleCount: 80,
-spread: 60,
-startVelocity: 25,
-origin: {
-x: (rect.left + rect.width / 2) / window.innerWidth,
-y: (rect.top + rect.height / 2) / window.innerHeight
-}
+spread: 60
 });
 }
-
-/* ================= MENU ================= */
-document.addEventListener('DOMContentLoaded', function() {
-const menuToggle = document.querySelector('.menu-toggle');
-const navLinks = document.querySelector('.nav-links');
-
-if (menuToggle && navLinks) {
-navLinks.classList.remove('show');
-
-menuToggle.addEventListener('click', function() {
-navLinks.classList.toggle('show');
-});
-
-const links = navLinks.querySelectorAll('a');
-links.forEach(link => {
-link.addEventListener('click', function() {
-navLinks.classList.remove('show');
-});
-});
-}
-});
 </script>
 
 </body>
