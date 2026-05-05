@@ -169,7 +169,7 @@ padding-left: 20px;
 margin-bottom: 10px;
 }
 
-/* ONLY CHANGE: Facebook share button styling */
+/* unchanged */
 .facebook-share {
 background: #1877f2;
 color: white;
@@ -184,6 +184,23 @@ font-weight: bold;
 
 .facebook-share:hover {
 background: #145dbf;
+}
+
+/* NEW: match petition page button exactly */
+.petition-share-btn {
+background: #004687;
+color: white;
+border: none;
+padding: 12px;
+width: 100%;
+border-radius: 6px;
+cursor: pointer;
+font-size: 16px;
+font-family: Arial, sans-serif;
+}
+
+.petition-share-btn:hover {
+background: #0066cc;
 }
 </style>
 </head>
@@ -239,9 +256,9 @@ Petitions help show decision-makers that the community is paying attention and w
 <li>Share the petition on Facebook to reach more people and receive a <strong>10% discount</strong> on your yard sign</li>
 </ul>
 
-<!-- Facebook Share Button -->
+<!-- CHANGED BUTTON ONLY -->
 <div style="margin-top:15px;">
-<button class="facebook-share" onclick="shareFacebook()">
+<button class="petition-share-btn" onclick="shareFacebook()">
 Share Petition on Facebook
 </button>
 </div>
