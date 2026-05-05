@@ -5,7 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Petition</title>
 
-<!-- Confetti library -->
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<!-- Confetti -->
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
 <style>
@@ -193,7 +197,7 @@ border-bottom: 1px solid #004687;
 Help spread the word by sharing this petition and receive a <strong>10% discount</strong> on your yard sign.
 </p>
 
-<button id="shareBtn" onclick="shareFacebook(event)">
+<button onclick="shareFacebook(event)">
 Share on Facebook
 </button>
 </div>
@@ -216,9 +220,28 @@ This discount is not connected to signing the petition.
 </div>
 
 <script>
-let count = localStorage.getItem("petitionCount") || 0;
-document.getElementById("counter").innerText = count;
+/* ================= FIREBASE SETUP ================= */
+const firebaseConfig = {
+apiKey: "AIzaSyDF8eCy7aveviDqjGikC6g0dFJUCkL_uQM",
+authDomain: "datacenterstop-ce374.firebaseapp.com",
+projectId: "datacenterstop-ce374",
+storageBucket: "datacenterstop-ce374.appspot.com",
+messagingSenderId: "591974235409",
+appId: "1:591974235409:web:850a2c1475d26c010320b0"
+};
 
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const counterRef = db.collection("petition").doc("counter");
+
+/* ================= LIVE COUNTER ================= */
+counterRef.onSnapshot(doc => {
+if (doc.exists) {
+document.getElementById("counter").innerText = doc.data().count;
+}
+});
+
+/* ================= SIGN FUNCTION ================= */
 function signPetition() {
 let name = document.getElementById("name").value;
 let email = document.getElementById("email").value;
@@ -228,9 +251,14 @@ alert("Please fill out both fields.");
 return;
 }
 
-count++;
-localStorage.setItem("petitionCount", count);
-document.getElementById("counter").innerText = count;
+counterRef.get().then(doc => {
+let current = doc.exists ? doc.data().count : 0;
+let updated = current + 1;
+
+counterRef.set({ count: updated });
+
+document.getElementById("counter").innerText = updated;
+});
 
 alert("Thank you for signing!");
 
@@ -238,6 +266,7 @@ document.getElementById("name").value = "";
 document.getElementById("email").value = "";
 }
 
+/* ================= SHARE BUTTON ================= */
 function shareFacebook(event) {
 const button = event.target;
 
@@ -247,10 +276,8 @@ window.location.href;
 
 navigator.clipboard.writeText(text);
 
-// Change button text
 button.innerText = "Post copied! Paste it on Facebook when sharing.";
 
-// Confetti from button
 const rect = button.getBoundingClientRect();
 
 confetti({
@@ -264,6 +291,7 @@ y: (rect.top + rect.height / 2) / window.innerHeight
 });
 }
 
+/* ================= MENU ================= */
 document.addEventListener('DOMContentLoaded', function() {
 const menuToggle = document.querySelector('.menu-toggle');
 const navLinks = document.querySelector('.nav-links');
