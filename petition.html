@@ -27,10 +27,7 @@ padding: 50px 20px;
 text-align: center;
 }
 
-header h1 {
-margin: 0;
-font-size: 40px;
-}
+header h1 { margin: 0; font-size: 40px; }
 
 header p {
 margin-top: 10px;
@@ -69,9 +66,7 @@ text-decoration: none;
 font-weight: bold;
 }
 
-.nav-links a:hover {
-text-decoration: underline;
-}
+.nav-links a:hover { text-decoration: underline; }
 
 .container {
 max-width: 900px;
@@ -187,7 +182,7 @@ border-bottom: 1px solid #004687;
 <input type="text" id="name" placeholder="First and Last Name">
 <input type="email" id="email" placeholder="Email Address">
 
-<button onclick="signPetition()">Sign Petition</button>
+<button onclick="signPetition(event)">Sign Petition</button>
 </div>
 
 <div class="section">
@@ -220,7 +215,7 @@ This discount is not connected to signing the petition.
 </div>
 
 <script>
-/* ================= FIREBASE SETUP ================= */
+/* ================= FIREBASE ================= */
 const firebaseConfig = {
 apiKey: "AIzaSyDF8eCy7aveviDqjGikC6g0dFJUCkL_uQM",
 authDomain: "datacenterstop-ce374.firebaseapp.com",
@@ -232,31 +227,58 @@ appId: "1:591974235409:web:850a2c1475d26c010320b0"
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+
 const counterRef = db.collection("petition").doc("counter");
 
-/* ================= LIVE COUNTER ================= */
+/* LIVE COUNTER */
 counterRef.onSnapshot(doc => {
 if (doc.exists) {
 document.getElementById("counter").innerText = doc.data().count;
 }
 });
 
+/* ================= ANTI-SPAM ================= */
+let lastClick = 0;
+
 /* ================= SIGN FUNCTION ================= */
-function signPetition() {
-let name = document.getElementById("name").value;
-let email = document.getElementById("email").value;
+function signPetition(event) {
+const now = Date.now();
+if (now - lastClick < 3000) {
+alert("Please wait a moment before signing again.");
+return;
+}
+lastClick = now;
+
+let name = document.getElementById("name").value.trim();
+let email = document.getElementById("email").value.trim().toLowerCase();
 
 if (!name || !email) {
 alert("Please fill out both fields.");
 return;
 }
 
-counterRef.get().then(doc => {
-let current = doc.exists ? doc.data().count : 0;
+const signerRef = db.collection("signers").doc(email);
+
+signerRef.get().then(doc => {
+
+if (doc.exists) {
+alert("This email has already signed the petition.");
+return;
+}
+
+/* Save signer */
+signerRef.set({
+name: name,
+email: email,
+timestamp: Date.now()
+});
+
+/* Increment counter safely */
+counterRef.get().then(counterDoc => {
+let current = counterDoc.exists ? counterDoc.data().count : 0;
 let updated = current + 1;
 
 counterRef.set({ count: updated });
-
 document.getElementById("counter").innerText = updated;
 });
 
@@ -264,6 +286,8 @@ alert("Thank you for signing!");
 
 document.getElementById("name").value = "";
 document.getElementById("email").value = "";
+
+});
 }
 
 /* ================= SHARE BUTTON ================= */
