@@ -15,7 +15,6 @@ color: #111;
 
 @media (max-width: 768px) {
 
-/* Make header text smaller on phones */
 header h1 {
 font-size: 28px;
 }
@@ -25,7 +24,6 @@ font-size: 14px;
 padding: 0 10px;
 }
 
-/* Navbar becomes stacked */
 .navbar {
 text-align: left;
 }
@@ -62,30 +60,21 @@ padding: 10px;
 border-bottom: 1px solid #004687;
 }
 
-/* Container padding tighter */
 .container {
 padding: 12px;
 }
 
-/* Cards feel better on small screens */
-.card {
+.section {
 padding: 15px;
 }
 
-/* Buttons easier to tap */
 button {
 font-size: 16px;
 padding: 14px;
 }
 
-/* Inputs easier to use */
 input, textarea {
 font-size: 16px;
-}
-
-/* Make page title smaller */
-.page-title {
-font-size: 22px;
 }
 }
 
@@ -169,7 +158,6 @@ font-weight: bold;
 text-decoration: none;
 }
 
-/* FORM STYLING */
 input, textarea {
 width: 100%;
 padding: 10px;
@@ -202,7 +190,6 @@ background: #0066cc;
 <h1>Contact Us</h1>
 </header>
 
-<!-- NAVBAR -->
 <div class="navbar">
 <button class="menu-toggle">☰ Menu</button>
 <div class="nav-links">
@@ -239,12 +226,11 @@ If you have questions about the campaign or want to get involved, send us a mess
 
 </div>
 
-<!-- CONTACT FORM -->
 <div class="section">
 
 <div class="title">Send a Message</div>
 
-<form action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+<form action="https://formspree.io/f/xlgzbdjp" method="POST">
 
 <input type="text" name="name" placeholder="Your Name" required>
 
@@ -264,11 +250,14 @@ If you have questions about the campaign or want to get involved, send us a mess
 document.addEventListener('DOMContentLoaded', function() {
 const menuToggle = document.querySelector('.menu-toggle');
 const navLinks = document.querySelector('.nav-links');
+
 if (menuToggle && navLinks) {
 navLinks.classList.remove('show');
+
 menuToggle.addEventListener('click', function() {
 navLinks.classList.toggle('show');
 });
+
 const links = navLinks.querySelectorAll('a');
 links.forEach(link => {
 link.addEventListener('click', function() {
