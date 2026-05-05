@@ -200,7 +200,8 @@ Share on Facebook
 <div class="section">
 <div class="title">Supporters Signed</div>
 
-<div class="counter" id="counter">0</div>
+<!-- FIXED SIGNATURE COUNTER -->
+<div class="counter" id="counter">249</div>
 
 <p class="small-center">
 Join your neighbors in protecting Marshfield.
@@ -228,10 +229,10 @@ appId: "1:591974235409:web:850a2c1475d26c010320b0"
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-/* ================= LIVE COUNTER (FIXED) ================= */
-db.collection("signers").onSnapshot(snapshot => {
+/* ================= LIVE COUNTER (DISABLED) ================= */
+/* db.collection("signers").onSnapshot(snapshot => {
 document.getElementById("counter").innerText = snapshot.size;
-});
+}); */
 
 /* ================= ANTI-SPAM ================= */
 let lastClick = 0;
