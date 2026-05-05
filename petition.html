@@ -30,6 +30,7 @@ header h1 { margin: 0; font-size: 40px; }
 background: #003366;
 text-align: center;
 padding: 10px 0;
+position: relative;
 }
 
 .nav-links {
@@ -82,7 +83,18 @@ padding: 12px;
 width: 100%;
 border-radius: 6px;
 cursor: pointer;
-margin-top: 10px;
+}
+
+button:hover {
+background: #0066cc;
+}
+
+.disclaimer {
+font-size: 12px;
+color: #555;
+margin-top: 30px;
+text-align: center;
+line-height: 1.4;
 }
 </style>
 </head>
@@ -91,14 +103,17 @@ margin-top: 10px;
 
 <header>
 <h1>Community Petition</h1>
-<p>Help Protect Marshfield from the Proposed Data Center</p>
+<p>Your Signature Sends a Message. Help Protect Marshfield from the Proposed Data Center</p>
 </header>
 
 <div class="navbar">
 <div class="nav-links">
 <a href="index.html">Home</a>
+<a href="why.html">Why This Matters</a>
+<a href="signs.html">Yard Signs</a>
+<a href="awareness.html">Raise Awareness</a>
 <a href="petition.html">Petition</a>
-<a href="contact.html">Contact</a>
+<a href="contact.html">Contact Us</a>
 </div>
 </div>
 
@@ -107,12 +122,12 @@ margin-top: 10px;
 <div class="section">
 <h3>Sign the Petition</h3>
 
-<input type="text" id="name" placeholder="Name">
-<input type="email" id="email" placeholder="Email">
+<input type="text" id="name" placeholder="First and Last Name">
+<input type="email" id="email" placeholder="Email Address">
 
 <button onclick="signPetition()">Sign Petition</button>
 
-<button onclick="shareFacebook()">Share Petition</button>
+<button id="shareBtn" onclick="shareFacebook()">Share Petition</button>
 </div>
 
 <div class="section">
@@ -120,9 +135,14 @@ margin-top: 10px;
 <div class="counter" id="counter">249</div>
 </div>
 
+<p class="disclaimer">
+Disclaimer: The 10% discount on sign orders is offered in appreciation of sharing this petition on social media. This discount is not connected to, and is not provided for, signing the petition. No discounts, incentives, or benefits are given in exchange for signing the petition.
+</p>
+
 </div>
 
 <script>
+/* FIREBASE */
 const firebaseConfig = {
 apiKey: "AIzaSyDF8eCy7aveviDqjGikC6g0dFJUCkL_uQM",
 authDomain: "datacenterstop-ce374.firebaseapp.com",
@@ -135,11 +155,10 @@ appId: "1:591974235409:web:850a2c1475d26c010320b0"
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-const baseCount = 249;
-const counterEl = document.getElementById("counter");
-let lastClick = 0;
+/* COUNTER */
+let baseCount = 249;
+let counterEl = document.getElementById("counter");
 
-/* LIVE COUNTER */
 db.collection("signers").onSnapshot(snapshot => {
 counterEl.innerText = baseCount + snapshot.size;
 });
@@ -147,19 +166,21 @@ counterEl.innerText = baseCount + snapshot.size;
 /* SIGN */
 function signPetition() {
 
-const now = Date.now();
-if (now - lastClick < 3000) return alert("Wait a moment.");
-lastClick = now;
-
 const name = document.getElementById("name").value.trim();
 const email = document.getElementById("email").value.trim().toLowerCase();
 
-if (!name || !email) return alert("Fill out all fields.");
+if (!name || !email) {
+alert("Please fill out both fields.");
+return;
+}
 
 const ref = db.collection("signers").doc(email);
 
 ref.get().then(doc => {
-if (doc.exists) return alert("Already signed.");
+if (doc.exists) {
+alert("You already signed.");
+return;
+}
 
 ref.set({
 name,
@@ -172,23 +193,25 @@ alert("Thank you for signing!");
 document.getElementById("name").value = "";
 document.getElementById("email").value = "";
 
-confetti({
-particleCount: 80,
-spread: 60
-});
-
 });
 });
 }
 
-/* SHARE BUTTON */
+/* SHARE BUTTON (text change version) */
 function shareFacebook() {
+const btn = document.getElementById("shareBtn");
+
 const text =
-"Support the Marshfield petition: " + window.location.href;
+"Support the Marshfield petition against the proposed data center: " +
+window.location.href;
 
 navigator.clipboard.writeText(text);
 
-alert("Copied! Paste it on Facebook.");
+btn.innerText = "Copied! Paste on Facebook";
+
+setTimeout(() => {
+btn.innerText = "Share Petition";
+}, 3000);
 
 confetti({
 particleCount: 80,
