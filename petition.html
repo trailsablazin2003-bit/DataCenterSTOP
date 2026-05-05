@@ -228,13 +228,9 @@ appId: "1:591974235409:web:850a2c1475d26c010320b0"
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-const counterRef = db.collection("petition").doc("counter");
-
-/* LIVE COUNTER */
-counterRef.onSnapshot(doc => {
-if (doc.exists) {
-document.getElementById("counter").innerText = doc.data().count;
-}
+/* ================= LIVE COUNTER (FIXED) ================= */
+db.collection("signers").onSnapshot(snapshot => {
+document.getElementById("counter").innerText = snapshot.size;
 });
 
 /* ================= ANTI-SPAM ================= */
@@ -278,16 +274,6 @@ signerRef.set({
 name: name,
 email: email,
 timestamp: Date.now()
-});
-
-/* ✅ FIXED COUNTER INCREMENT */
-counterRef.set(
-  { count: firebase.firestore.FieldValue.increment(1) },
-  { merge: true }
-).then(() => {
-  console.log("Counter incremented");
-}).catch((error) => {
-  console.error("Counter failed:", error);
 });
 
 alert("Thank you for signing!");
