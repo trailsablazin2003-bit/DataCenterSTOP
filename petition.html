@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Petition</title>
 
+<!-- Confetti library -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
 <style>
 body {
 margin: 0;
@@ -25,7 +28,6 @@ margin: 0;
 font-size: 40px;
 }
 
-/* MATCHING TAGLINE STYLE */
 header p {
 margin-top: 10px;
 font-size: 18px;
@@ -123,7 +125,6 @@ margin: 10px 0;
 text-align: center;
 }
 
-/* DISCLAIMER STYLE */
 .disclaimer {
 font-size: 12px;
 color: #555;
@@ -133,12 +134,8 @@ line-height: 1.4;
 }
 
 @media (max-width: 768px) {
-.navbar {
-text-align: left;
-}
-.menu-toggle {
-display: block;
-}
+.navbar { text-align: left; }
+.menu-toggle { display: block; }
 .nav-links {
 display: none;
 flex-direction: column;
@@ -149,9 +146,7 @@ left: 0;
 top: 100%;
 z-index: 1;
 }
-.nav-links.show {
-display: flex;
-}
+.nav-links.show { display: flex; }
 .nav-links a {
 margin: 0;
 padding: 10px;
@@ -198,7 +193,9 @@ border-bottom: 1px solid #004687;
 Help spread the word by sharing this petition and receive a <strong>10% discount</strong> on your yard sign.
 </p>
 
-<button onclick="shareFacebook()">Share on Facebook</button>
+<button id="shareBtn" onclick="shareFacebook(event)">
+Share on Facebook
+</button>
 </div>
 
 <div class="section">
@@ -212,7 +209,8 @@ Join your neighbors in protecting Marshfield.
 </div>
 
 <p class="disclaimer">
-Disclaimer: The 10% discount on sign orders is offered in appreciation of sharing this petition on social media. This discount is not connected to, and is not provided for, signing the petition. No discounts, incentives, or benefits are given in exchange for signing the petition.
+Disclaimer: The 10% discount on sign orders is offered in appreciation of sharing this petition on social media.
+This discount is not connected to signing the petition.
 </p>
 
 </div>
@@ -240,25 +238,43 @@ document.getElementById("name").value = "";
 document.getElementById("email").value = "";
 }
 
-function shareFacebook() {
-let url = encodeURIComponent(window.location.href);
-let text = encodeURIComponent(
-"Support the Marshfield, MO petition against the proposed data center. Sign here:"
-);
+function shareFacebook(event) {
+const button = event.target;
 
-let shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`;
+const text =
+"Support the Marshfield, MO petition against the proposed data center. Sign here: " +
+window.location.href;
 
-window.open(shareUrl, "_blank");
+navigator.clipboard.writeText(text);
+
+// Change button text
+button.innerText = "Post copied! Paste it on Facebook when sharing.";
+
+// Confetti from button
+const rect = button.getBoundingClientRect();
+
+confetti({
+particleCount: 80,
+spread: 60,
+startVelocity: 25,
+origin: {
+x: (rect.left + rect.width / 2) / window.innerWidth,
+y: (rect.top + rect.height / 2) / window.innerHeight
+}
+});
 }
 
 document.addEventListener('DOMContentLoaded', function() {
 const menuToggle = document.querySelector('.menu-toggle');
 const navLinks = document.querySelector('.nav-links');
+
 if (menuToggle && navLinks) {
 navLinks.classList.remove('show');
+
 menuToggle.addEventListener('click', function() {
 navLinks.classList.toggle('show');
 });
+
 const links = navLinks.querySelectorAll('a');
 links.forEach(link => {
 link.addEventListener('click', function() {
