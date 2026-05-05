@@ -30,7 +30,6 @@ header h1 { margin: 0; font-size: 40px; }
 background: #003366;
 text-align: center;
 padding: 10px 0;
-position: relative;
 }
 
 .nav-links {
@@ -83,6 +82,7 @@ padding: 12px;
 width: 100%;
 border-radius: 6px;
 cursor: pointer;
+margin-top: 10px;
 }
 </style>
 </head>
@@ -110,19 +110,19 @@ cursor: pointer;
 <input type="text" id="name" placeholder="Name">
 <input type="email" id="email" placeholder="Email">
 
-<button onclick="signPetition()">Sign</button>
+<button onclick="signPetition()">Sign Petition</button>
+
+<button onclick="shareFacebook()">Share Petition</button>
 </div>
 
 <div class="section">
 <h3>Supporters Signed</h3>
-
 <div class="counter" id="counter">249</div>
 </div>
 
 </div>
 
 <script>
-/* FIREBASE */
 const firebaseConfig = {
 apiKey: "AIzaSyDF8eCy7aveviDqjGikC6g0dFJUCkL_uQM",
 authDomain: "datacenterstop-ce374.firebaseapp.com",
@@ -135,54 +135,39 @@ appId: "1:591974235409:web:850a2c1475d26c010320b0"
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-/* BASE COUNTER */
 const baseCount = 249;
 const counterEl = document.getElementById("counter");
 let lastClick = 0;
 
-/* LIVE SYNC (REAL TOTAL) */
+/* LIVE COUNTER */
 db.collection("signers").onSnapshot(snapshot => {
 counterEl.innerText = baseCount + snapshot.size;
 });
 
-/* SIGN FUNCTION */
+/* SIGN */
 function signPetition() {
 
 const now = Date.now();
-if (now - lastClick < 3000) {
-alert("Wait a moment before signing again.");
-return;
-}
+if (now - lastClick < 3000) return alert("Wait a moment.");
 lastClick = now;
 
 const name = document.getElementById("name").value.trim();
 const email = document.getElementById("email").value.trim().toLowerCase();
 
-if (!name || !email) {
-alert("Fill out both fields.");
-return;
-}
+if (!name || !email) return alert("Fill out all fields.");
 
 const ref = db.collection("signers").doc(email);
 
 ref.get().then(doc => {
-
-if (doc.exists) {
-alert("You already signed.");
-return;
-}
+if (doc.exists) return alert("Already signed.");
 
 ref.set({
 name,
 email,
 timestamp: Date.now()
-})
-.then(() => {
+}).then(() => {
 
 alert("Thank you for signing!");
-
-// optional instant bump (UI only)
-counterEl.innerText = parseInt(counterEl.innerText) + 1;
 
 document.getElementById("name").value = "";
 document.getElementById("email").value = "";
@@ -192,14 +177,23 @@ particleCount: 80,
 spread: 60
 });
 
-})
-.catch(err => {
-console.error(err);
-alert("Error saving signature.");
 });
-
 });
+}
 
+/* SHARE BUTTON */
+function shareFacebook() {
+const text =
+"Support the Marshfield petition: " + window.location.href;
+
+navigator.clipboard.writeText(text);
+
+alert("Copied! Paste it on Facebook.");
+
+confetti({
+particleCount: 80,
+spread: 60
+});
 }
 </script>
 
