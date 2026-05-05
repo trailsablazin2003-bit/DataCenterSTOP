@@ -252,8 +252,16 @@ lastClick = now;
 let name = document.getElementById("name").value.trim();
 let email = document.getElementById("email").value.trim().toLowerCase();
 
+/* ✅ ONLY CHANGE: email validation */
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 if (!name || !email) {
 alert("Please fill out both fields.");
+return;
+}
+
+if (!emailRegex.test(email)) {
+alert("Please enter a valid email address.");
 return;
 }
 
