@@ -5,8 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Petition</title>
 
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<!-- Confetti -->
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
 <style>
@@ -26,11 +29,29 @@ text-align: center;
 
 header h1 { margin: 0; font-size: 40px; }
 
+header p {
+margin-top: 10px;
+font-size: 18px;
+opacity: 0.9;
+}
+
 .navbar {
 background: #003366;
 text-align: center;
 padding: 10px 0;
 position: relative;
+}
+
+.menu-toggle {
+display: none;
+background: #003366;
+color: white;
+border: none;
+font-size: 18px;
+cursor: pointer;
+padding: 10px;
+width: auto;
+min-width: 80px;
 }
 
 .nav-links {
@@ -45,6 +66,8 @@ text-decoration: none;
 font-weight: bold;
 }
 
+.nav-links a:hover { text-decoration: underline; }
+
 .container {
 max-width: 900px;
 margin: auto;
@@ -58,12 +81,10 @@ border-radius: 10px;
 margin-top: 20px;
 }
 
-.counter {
-font-size: 42px;
+.title {
+font-size: 24px;
 font-weight: bold;
-color: #004687;
-text-align: center;
-margin: 10px 0;
+margin-bottom: 10px;
 }
 
 input {
@@ -73,6 +94,7 @@ margin-top: 10px;
 margin-bottom: 12px;
 border-radius: 6px;
 border: 1px solid #ccc;
+font-size: 16px;
 }
 
 button {
@@ -83,10 +105,23 @@ padding: 12px;
 width: 100%;
 border-radius: 6px;
 cursor: pointer;
+font-size: 16px;
 }
 
 button:hover {
 background: #0066cc;
+}
+
+.counter {
+font-size: 42px;
+font-weight: bold;
+color: #004687;
+text-align: center;
+margin: 10px 0;
+}
+
+.small-center {
+text-align: center;
 }
 
 .disclaimer {
@@ -95,6 +130,27 @@ color: #555;
 margin-top: 30px;
 text-align: center;
 line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+.navbar { text-align: left; }
+.menu-toggle { display: block; }
+.nav-links {
+display: none;
+flex-direction: column;
+background: #003366;
+position: absolute;
+width: 100%;
+left: 0;
+top: 100%;
+z-index: 1;
+}
+.nav-links.show { display: flex; }
+.nav-links a {
+margin: 0;
+padding: 10px;
+border-bottom: 1px solid #004687;
+}
 }
 </style>
 </head>
@@ -107,6 +163,7 @@ line-height: 1.4;
 </header>
 
 <div class="navbar">
+<button class="menu-toggle">☰ Menu</button>
 <div class="nav-links">
 <a href="index.html">Home</a>
 <a href="why.html">Why This Matters</a>
@@ -119,20 +176,36 @@ line-height: 1.4;
 
 <div class="container">
 
+<!-- SIGN PETITION SECTION -->
 <div class="section">
-<h3>Sign the Petition</h3>
+<div class="title">Sign the Petition</div>
 
 <input type="text" id="name" placeholder="First and Last Name">
 <input type="email" id="email" placeholder="Email Address">
 
 <button onclick="signPetition()">Sign Petition</button>
-
-<button id="shareBtn" onclick="shareFacebook()">Share Petition</button>
 </div>
 
+<!-- SHARE PETITION SECTION (RESTORED SEPARATE BLOCK) -->
 <div class="section">
-<h3>Supporters Signed</h3>
+<div class="title">Share the Petition</div>
+
+<p class="small-center">
+Help spread the word by sharing this petition and receive a <strong>10% discount</strong> on your yard sign.
+</p>
+
+<button id="shareBtn" onclick="shareFacebook()">Share on Facebook</button>
+</div>
+
+<!-- COUNTER SECTION -->
+<div class="section">
+<div class="title">Supporters Signed</div>
+
 <div class="counter" id="counter">249</div>
+
+<p class="small-center">
+Join your neighbors in protecting Marshfield.
+</p>
 </div>
 
 <p class="disclaimer">
@@ -142,7 +215,7 @@ Disclaimer: The 10% discount on sign orders is offered in appreciation of sharin
 </div>
 
 <script>
-/* FIREBASE */
+/* ================= FIREBASE ================= */
 const firebaseConfig = {
 apiKey: "AIzaSyDF8eCy7aveviDqjGikC6g0dFJUCkL_uQM",
 authDomain: "datacenterstop-ce374.firebaseapp.com",
@@ -155,69 +228,102 @@ appId: "1:591974235409:web:850a2c1475d26c010320b0"
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-/* COUNTER */
-let baseCount = 249;
-let counterEl = document.getElementById("counter");
-
+/* ================= LIVE COUNTER ================= */
+const baseCount = 249;
+const counterEl = document.getElementById("counter");
 db.collection("signers").onSnapshot(snapshot => {
 counterEl.innerText = baseCount + snapshot.size;
 });
 
-/* SIGN */
-function signPetition() {
+/* ================= ANTI-SPAM ================= */
+let lastClick = 0;
 
-const name = document.getElementById("name").value.trim();
-const email = document.getElementById("email").value.trim().toLowerCase();
+/* ================= SIGN FUNCTION ================= */
+function signPetition() {
+const now = Date.now();
+if (now - lastClick < 3000) {
+alert("Please wait a moment before signing again.");
+return;
+}
+lastClick = now;
+
+let name = document.getElementById("name").value.trim();
+let email = document.getElementById("email").value.trim().toLowerCase();
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 if (!name || !email) {
 alert("Please fill out both fields.");
 return;
 }
 
-const ref = db.collection("signers").doc(email);
-
-ref.get().then(doc => {
-if (doc.exists) {
-alert("You already signed.");
+if (!emailRegex.test(email)) {
+alert("Please enter a valid email address.");
 return;
 }
 
-ref.set({
-name,
-email,
+const signerRef = db.collection("signers").doc(email);
+
+signerRef.get().then(doc => {
+if (doc.exists) {
+alert("This email has already signed the petition.");
+return;
+}
+
+/* Save signer */
+signerRef.set({
+name: name,
+email: email,
 timestamp: Date.now()
-}).then(() => {
+});
 
 alert("Thank you for signing!");
 
 document.getElementById("name").value = "";
 document.getElementById("email").value = "";
-
-});
 });
 }
 
-/* SHARE BUTTON (text change version) */
+/* ================= SHARE BUTTON ================= */
 function shareFacebook() {
 const btn = document.getElementById("shareBtn");
 
 const text =
-"Support the Marshfield petition against the proposed data center: " +
+"Support the Marshfield, MO petition against the proposed data center. Sign here: " +
 window.location.href;
 
 navigator.clipboard.writeText(text);
 
-btn.innerText = "Copied! Paste on Facebook";
+btn.innerText = "Post copied! Paste it on Facebook when sharing.";
 
 setTimeout(() => {
-btn.innerText = "Share Petition";
+btn.innerText = "Share on Facebook";
 }, 3000);
 
 confetti({
 particleCount: 80,
-spread: 60
+spread: 60,
+startVelocity: 25
 });
 }
+
+/* ================= MENU ================= */
+document.addEventListener('DOMContentLoaded', function() {
+const menuToggle = document.querySelector('.menu-toggle');
+const navLinks = document.querySelector('.nav-links');
+if (menuToggle && navLinks) {
+navLinks.classList.remove('show');
+menuToggle.addEventListener('click', function() {
+navLinks.classList.toggle('show');
+});
+const links = navLinks.querySelectorAll('a');
+links.forEach(link => {
+link.addEventListener('click', function() {
+navLinks.classList.remove('show');
+});
+});
+}
+});
 </script>
 
 </body>
