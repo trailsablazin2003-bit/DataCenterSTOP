@@ -200,7 +200,7 @@ Share on Facebook
 <div class="section">
 <div class="title">Supporters Signed</div>
 
-<!-- FIXED SIGNATURE COUNTER -->
+<!-- STARTS AT 249 AND UPDATES LIVE -->
 <div class="counter" id="counter">249</div>
 
 <p class="small-center">
@@ -210,7 +210,6 @@ Join your neighbors in protecting Marshfield.
 
 <p class="disclaimer">
 Disclaimer: The 10% discount on sign orders is offered in appreciation of sharing this petition on social media. This discount is not connected to, and is not provided for, signing the petition. No discounts, incentives, or benefits are given in exchange for signing the petition.
-
 </p>
 
 </div>
@@ -229,10 +228,16 @@ appId: "1:591974235409:web:850a2c1475d26c010320b0"
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-/* ================= LIVE COUNTER (DISABLED) ================= */
-/* db.collection("signers").onSnapshot(snapshot => {
-document.getElementById("counter").innerText = snapshot.size;
-}); */
+/* ================= LIVE COUNTER (STARTS AT 249) ================= */
+let initialCount = 249;
+document.getElementById("counter").innerText = initialCount;
+
+db.collection("signers").onSnapshot(snapshot => {
+  // Make the counter at least 249 + any new signers
+  let liveCount = snapshot.size;
+  let displayCount = Math.max(initialCount, liveCount);
+  document.getElementById("counter").innerText = displayCount;
+});
 
 /* ================= ANTI-SPAM ================= */
 let lastClick = 0;
