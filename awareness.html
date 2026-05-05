@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Raise Awareness</title>
 
+<!-- Confetti library -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
 <style>
 body {
 margin: 0;
@@ -169,7 +172,6 @@ padding-left: 20px;
 margin-bottom: 10px;
 }
 
-/* unchanged */
 .facebook-share {
 background: #1877f2;
 color: white;
@@ -186,7 +188,6 @@ font-weight: bold;
 background: #145dbf;
 }
 
-/* NEW: match petition page button exactly */
 .petition-share-btn {
 background: #004687;
 color: white;
@@ -253,12 +254,10 @@ Petitions help show decision-makers that the community is paying attention and w
 <ul class="action">
 <li>Display our collective support</li>
 <li>Encourage friends and family to add their names</li>
-<li>Share the petition on Facebook to reach more people and receive a <strong>10% discount</strong> on your yard sign</li>
 </ul>
 
-<!-- CHANGED BUTTON ONLY -->
 <div style="margin-top:15px;">
-<button class="petition-share-btn" onclick="shareFacebook()">
+<button class="petition-share-btn" onclick="shareFacebook(event)">
 Share Petition on Facebook
 </button>
 </div>
@@ -318,15 +317,30 @@ navLinks.classList.remove('show');
 }
 });
 
-function shareFacebook() {
-let url = encodeURIComponent(window.location.href);
-let text = encodeURIComponent(
-"Support the Marshfield, MO petition against the proposed data center. Sign here:"
-);
+function shareFacebook(event) {
+const button = event.target;
 
-let shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`;
+const text =
+"Support the Marshfield, MO petition against the proposed data center. Sign here: " +
+window.location.href;
 
-window.open(shareUrl, "_blank");
+navigator.clipboard.writeText(text);
+
+// change button text
+button.innerText = "Post copied! Paste it on Facebook when sharing.";
+
+// confetti from button
+const rect = button.getBoundingClientRect();
+
+confetti({
+particleCount: 80,
+spread: 60,
+startVelocity: 25,
+origin: {
+x: (rect.left + rect.width / 2) / window.innerWidth,
+y: (rect.top + rect.height / 2) / window.innerHeight
+}
+});
 }
 </script>
 
